@@ -4,8 +4,7 @@ import {
   getProducts, 
   getCategories, 
   getTestimonials, 
-  getLogisticsNodes,
-  migrateDbToFirestore 
+  getLogisticsNodes
 } from '@/lib/firebaseDb'
 import HeroSlider from '@/components/HeroSlider'
 import ProductShowcase from '@/components/ProductShowcase'
@@ -20,9 +19,6 @@ import { CheckCircle2, ShieldCheck, Truck, Award } from 'lucide-react'
 export const revalidate = 0 // Disable cache to reflect admin changes instantly
 
 export default async function HomePage() {
-  // Trigger automated one-time migration if configured
-  await migrateDbToFirestore()
-
   // Fetch data from Firebase Firestore
   const settings = await getWebsiteSettings()
   const slides = (await getHeroSlides()).filter((s: any) => s.isEnabled)

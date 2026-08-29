@@ -10,8 +10,7 @@ import {
   getTestimonials, 
   getInquiries, 
   getLogisticsNodes, 
-  getGalleryImages,
-  migrateDbToFirestore
+  getGalleryImages
 } from '@/lib/firebaseDb'
 import AdminDashboard from '@/components/AdminDashboard'
 
@@ -23,9 +22,6 @@ export default async function AdminPage() {
   if (!session) {
     redirect('/admin/login')
   }
-
-  // Trigger one-time migration if needed
-  await migrateDbToFirestore()
 
   // 2. Query all database collections for the administrator dashboard panels from Firebase
   const settings = await getWebsiteSettings()
