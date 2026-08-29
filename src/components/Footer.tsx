@@ -213,14 +213,18 @@ export default function Footer({ settings }: FooterProps) {
               <Phone className="h-4 w-4 text-secondary shrink-0 mt-1" />
               <div className="flex flex-col gap-1 text-xs font-semibold">
                 {(() => {
-                  let phones = [settings?.phone1, settings?.phone2].filter(Boolean)
+                  let phones = [settings?.phone1, settings?.phone2, phone1, phone2].filter(Boolean)
                   if (settings?.contactPhones) {
                     try {
                       const parsed = JSON.parse(settings.contactPhones)
-                      if (Array.isArray(parsed) && parsed.length > 0) phones = parsed
+                      const validPhones = parsed.filter((p: string) => p && p.trim() !== '')
+                      if (Array.isArray(parsed) && validPhones.length > 0) {
+                        phones = [...phones, ...validPhones]
+                      }
                     } catch (e) {}
                   }
-                  return phones.map((p: any, pIdx) => (
+                  const uniquePhones = Array.from(new Set(phones))
+                  return uniquePhones.slice(0, 2).map((p: any, pIdx) => (
                     <a
                       key={pIdx}
                       href={`tel:${p.replace(/[^\d+]/g, '')}`}
@@ -236,14 +240,18 @@ export default function Footer({ settings }: FooterProps) {
               <Mail className="h-4 w-4 text-secondary shrink-0 mt-1" />
               <div className="flex flex-col gap-1 text-xs font-semibold">
                 {(() => {
-                  let emails = [settings?.email].filter(Boolean)
+                  let emails = [settings?.email, email].filter(Boolean)
                   if (settings?.contactEmails) {
                     try {
                       const parsed = JSON.parse(settings.contactEmails)
-                      if (Array.isArray(parsed) && parsed.length > 0) emails = parsed
+                      const validEmails = parsed.filter((e: string) => e && e.trim() !== '')
+                      if (Array.isArray(parsed) && validEmails.length > 0) {
+                        emails = [...emails, ...validEmails]
+                      }
                     } catch (e) {}
                   }
-                  return emails.map((e: any, eIdx) => (
+                  const uniqueEmails = Array.from(new Set(emails))
+                  return uniqueEmails.slice(0, 2).map((e: any, eIdx) => (
                     <a
                       key={eIdx}
                       href={`mailto:${e}`}
