@@ -8,6 +8,8 @@ import bcrypt from 'bcryptjs'
 import fs from 'fs'
 import path from 'path'
 
+export const dynamic = 'force-dynamic'
+
 // Helper to manage dynamic Super Admin profile tracking
 function getSuperAdminInfo() {
   const defaultInfo = {
@@ -15,15 +17,20 @@ function getSuperAdminInfo() {
     uids: [] as string[]
   }
   try {
-    const filePath = path.join(process.cwd(), 'src', 'lib', 'superadmin.json')
+    const isVercel = !!process.env.VERCEL
+    const filePath = isVercel 
+      ? path.join('/tmp', 'superadmin.json')
+      : path.join(process.cwd(), 'src', 'lib', 'superadmin.json')
+      
     if (fs.existsSync(filePath)) {
       const data = fs.readFileSync(filePath, 'utf8')
       return JSON.parse(data)
     } else {
-      // Ensure the directory exists and write default config
-      const dirPath = path.dirname(filePath)
-      if (!fs.existsSync(dirPath)) {
-        fs.mkdirSync(dirPath, { recursive: true })
+      if (!isVercel) {
+        const dirPath = path.dirname(filePath)
+        if (!fs.existsSync(dirPath)) {
+          fs.mkdirSync(dirPath, { recursive: true })
+        }
       }
       fs.writeFileSync(filePath, JSON.stringify(defaultInfo, null, 2), 'utf8')
     }
@@ -35,7 +42,10 @@ function getSuperAdminInfo() {
 
 function saveSuperAdminInfo(info: any) {
   try {
-    const filePath = path.join(process.cwd(), 'src', 'lib', 'superadmin.json')
+    const isVercel = !!process.env.VERCEL
+    const filePath = isVercel 
+      ? path.join('/tmp', 'superadmin.json')
+      : path.join(process.cwd(), 'src', 'lib', 'superadmin.json')
     fs.writeFileSync(filePath, JSON.stringify(info, null, 2), 'utf8')
   } catch (e) {
     console.error('Failed to write superadmin.json:', e)
