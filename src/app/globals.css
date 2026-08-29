@@ -1,0 +1,299 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --primary: #06402b;
+    --primary-light: #0a5f40;
+    --primary-dark: #032318;
+    --secondary: #d69317;
+    --secondary-light: #f0ac2d;
+    --secondary-dark: #a36f0e;
+    --accent: #f3f4f6;
+    --accent-dark: #e5e7eb;
+    --text-primary: #111827;
+    --text-secondary: #4b5563;
+    --text-muted: #9ca3af;
+    --bg-primary: #ffffff;
+    --bg-secondary: #f9fafb;
+    --bg-card: #ffffff;
+    --font-serif: 'Playfair Display', Georgia, serif;
+    --font-sans: 'Inter', system-ui, sans-serif;
+  }
+
+  body {
+    color: var(--text-primary);
+    background-color: var(--bg-primary);
+    font-family: var(--font-sans);
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-serif);
+    font-weight: 700;
+  }
+}
+
+/* Lenis Smooth Scroll Configuration */
+html.lenis, html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+.lenis.lenis-scrolling iframe {
+  pointer-events: none;
+}
+
+/* Premium Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 10px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--primary-light);
+  border-radius: 5px;
+  border: 2px solid var(--bg-secondary);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
+}
+
+/* GSAP animations helpers */
+.line-reveal {
+  overflow: hidden;
+  display: inline-block;
+}
+
+.word-reveal {
+  display: inline-block;
+  transform: translateY(100%);
+}
+
+.parallax-container {
+  overflow: hidden;
+}
+
+.parallax-img {
+  will-change: transform;
+}
+
+/* Custom styled inputs & fields */
+input, textarea, select {
+  outline: none;
+  transition: all 0.2s ease-in-out;
+}
+
+input:focus, textarea:focus, select:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(6, 64, 43, 0.1);
+}
+
+/* ==========================================
+   THEME STYLING CONFIGURATIONS & DESIGN SYSTEMS
+   ========================================== */
+
+/* Theme 1: Premium Green (PREMIUM GLOBAL TRADE / CORPORATE LUXURY) */
+.theme-premium-green {
+  --primary: #06402b;
+  --primary-light: #0a5f40;
+  --primary-dark: #032318;
+  --secondary: #d69317;
+  --secondary-light: #f0ac2d;
+  --secondary-dark: #a36f0e;
+  --accent: #f3f4f6;
+  --accent-dark: #e5e7eb;
+  --text-primary: #111827;
+  --text-secondary: #4b5563;
+  --text-muted: #9ca3af;
+  --bg-primary: #ffffff;
+  --bg-secondary: #f9fafb;
+  --bg-card: #ffffff;
+  --font-serif: 'Playfair Display', Georgia, serif;
+  --font-sans: 'Inter', system-ui, sans-serif;
+}
+
+.theme-premium-green h1,
+.theme-premium-green h2,
+.theme-premium-green h3,
+.theme-premium-green h4,
+.theme-premium-green h5,
+.theme-premium-green h6 {
+  font-family: var(--font-serif);
+  letter-spacing: -0.01em;
+}
+
+.theme-premium-green button,
+.theme-premium-green a.btn {
+  border-radius: 0px !important;
+  font-family: var(--font-sans);
+}
+
+/* Theme 2: Oceanic Minimalist (MODERN EDITORIAL / INTERNATIONAL COMMERCE) */
+.theme-oceanic-minimal {
+  --primary: #0f4c81; /* Indigo blue */
+  --primary-light: #1c6ba9;
+  --primary-dark: #072e50;
+  --secondary: #f4a261; /* Coral Orange */
+  --secondary-light: #f8c291;
+  --secondary-dark: #c57635;
+  --accent: #eef2f6;
+  --accent-dark: #cbd5e1;
+  --text-primary: #0f172a; /* Slate 900 */
+  --text-secondary: #475569; /* Slate 600 */
+  --text-muted: #94a3b8;
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8fafc;
+  --bg-card: #ffffff;
+  --font-serif: 'Inter', system-ui, sans-serif; /* SANS SERIF HEADERS FOR MODERN LOOK */
+  --font-sans: 'Inter', system-ui, sans-serif;
+}
+
+.theme-oceanic-minimal h1,
+.theme-oceanic-minimal h2,
+.theme-oceanic-minimal h3,
+.theme-oceanic-minimal h4,
+.theme-oceanic-minimal h5,
+.theme-oceanic-minimal h6 {
+  font-family: var(--font-sans) !important;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  text-transform: none;
+}
+
+/* Modern Editorial spacing, rounded cards, no borders, soft shadows */
+.theme-oceanic-minimal .border {
+  border-color: transparent !important;
+}
+.theme-oceanic-minimal .border-accent,
+.theme-oceanic-minimal .border-accent\/40 {
+  border-color: #f1f5f9 !important;
+}
+.theme-oceanic-minimal div.bg-bg-secondary,
+.theme-oceanic-minimal div.bg-bg-card {
+  border-radius: 12px !important;
+  box-shadow: 0 10px 30px -10px rgba(15, 76, 129, 0.08) !important;
+  border: 1px solid #f1f5f9 !important;
+}
+.theme-oceanic-minimal button,
+.theme-oceanic-minimal a.px-8,
+.theme-oceanic-minimal a.px-6,
+.theme-oceanic-minimal button[type="submit"] {
+  border-radius: 9999px !important; /* Fully rounded buttons */
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 700;
+}
+.theme-oceanic-minimal input,
+.theme-oceanic-minimal textarea,
+.theme-oceanic-minimal select {
+  border-radius: 8px !important;
+  border-color: #cbd5e1 !important;
+}
+.theme-oceanic-minimal header {
+  border-bottom: none !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03) !important;
+}
+
+/* Theme 3: Bold Luxury / Contrast Dark (BOLD HIGH-END INDUSTRIAL / EXPORT ENTERPRISE) */
+.theme-bold-luxury {
+  --primary: #1a1a1a; /* Dark charcoal */
+  --primary-light: #404040;
+  --primary-dark: #000000;
+  --secondary: #ff3e3e; /* Crimson Red */
+  --secondary-light: #ff6e6e;
+  --secondary-dark: #b31010;
+  --accent: #262626; /* Dark gray line */
+  --accent-dark: #3a3a3a;
+  --text-primary: #ffffff; /* Bright white */
+  --text-secondary: #a3a3a3; /* Neutral gray */
+  --text-muted: #737373;
+  --bg-primary: #0a0a0a; /* True pitch dark */
+  --bg-secondary: #121212;
+  --bg-card: #171717;
+  --font-serif: Georgia, serif;
+  --font-sans: 'Inter', system-ui, sans-serif;
+}
+
+/* Force dark layout styles */
+.theme-bold-luxury body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+.theme-bold-luxury h1,
+.theme-bold-luxury h2,
+.theme-bold-luxury h3,
+.theme-bold-luxury h4,
+.theme-bold-luxury h5,
+.theme-bold-luxury h6 {
+  font-family: var(--font-serif);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 900;
+}
+
+.theme-bold-luxury input, 
+.theme-bold-luxury textarea, 
+.theme-bold-luxury select {
+  background-color: #121212 !important;
+  color: #ffffff !important;
+  border-color: #333333 !important;
+  border-width: 2px !important;
+}
+
+/* Sharp blocky industrial layouts: thick red/white borders, absolute black background */
+.theme-bold-luxury .border,
+.theme-bold-luxury .border-accent,
+.theme-bold-luxury .border-accent\/40 {
+  border-color: #333333 !important;
+  border-width: 2px !important;
+}
+.theme-bold-luxury div.bg-bg-secondary,
+.theme-bold-luxury div.bg-bg-card {
+  background-color: #121212 !important;
+  border: 2px solid #ff3e3e !important;
+  border-radius: 0px !important;
+}
+.theme-bold-luxury button,
+.theme-bold-luxury a.px-8,
+.theme-bold-luxury a.px-6,
+.theme-bold-luxury button[type="submit"] {
+  border-radius: 0px !important;
+  border: 2px solid #ff3e3e !important;
+  background-color: #ff3e3e !important;
+  color: #000000 !important;
+  font-weight: 900 !important;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  transition: none !important; /* Instant response hover */
+}
+.theme-bold-luxury button:hover,
+.theme-bold-luxury a.px-8:hover,
+.theme-bold-luxury button[type="submit"]:hover {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  border-color: #ffffff !important;
+}
+.theme-bold-luxury header {
+  background-color: #000000 !important;
+  border-bottom: 3px solid #ff3e3e !important;
+}
+.theme-bold-luxury footer {
+  background-color: #000000 !important;
+  border-top: 3px solid #ff3e3e !important;
+}
+

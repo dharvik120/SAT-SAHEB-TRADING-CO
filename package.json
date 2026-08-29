@@ -1,0 +1,49 @@
+{
+  "name": "sat-saheb-trading-co",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "prisma:generate": "prisma generate",
+    "prisma:seed": "node prisma/seed.js"
+  },
+  "dependencies": {
+    "@dnd-kit/core": "^6.1.0",
+    "@dnd-kit/modifiers": "^7.0.0",
+    "@dnd-kit/sortable": "^8.0.0",
+    "@hookform/resolvers": "^3.9.0",
+    "@prisma/client": "^5.12.1",
+    "@tanstack/react-table": "^8.15.0",
+    "bcryptjs": "^2.4.3",
+    "cloudinary": "^2.10.1",
+    "clsx": "^2.1.0",
+    "embla-carousel-react": "^8.0.0",
+    "firebase": "^12.18.0",
+    "framer-motion": "^11.0.8",
+    "gsap": "^3.12.5",
+    "jsonwebtoken": "^9.0.2",
+    "lenis": "^1.1.15",
+    "lucide-react": "^0.359.0",
+    "next": "^14.1.4",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-hook-form": "^7.51.1",
+    "tailwind-merge": "^2.2.2",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/jsonwebtoken": "^9.0.6",
+    "@types/node": "^20.11.30",
+    "@types/react": "^18.2.73",
+    "@types/react-dom": "^18.2.22",
+    "autoprefixer": "^10.4.19",
+    "postcss": "^8.4.38",
+    "prisma": "^5.12.1",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5.4.3"
+  }
+}

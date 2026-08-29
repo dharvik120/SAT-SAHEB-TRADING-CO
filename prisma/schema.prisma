@@ -1,0 +1,310 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model AdminUser {
+  id           Int      @id @default(autoincrement())
+  username     String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model WebsiteSettings {
+  id                     Int     @id @default(1)
+  companyName            String  @default("SAT SAHEB TRADING CO.")
+  address                String  @default("Office No.126 1st Floor Shakti Shopping Centre, Shakti Nagar Vill: Nana Kapaya Mundra-Kutch, 370421")
+  email                  String  @default("info@satsahebtrading.com")
+  phone1                 String  @default("+91 90996 67113")
+  phone2                 String  @default("+91 98252 15344")
+  whatsappNumber         String  @default("+91 90996 67113")
+  whatsappDefaultMessage String  @default("Hello SAT SAHEB TRADING CO., I am interested in your products.")
+  googleMapUrl           String  @default("https://maps.google.com/maps?q=Office%20No.126%201st%20Floor%20Shakti%20Shopping%20Centre,%20Shakti%20Nagar%20Vill:%20Nana%20Kapaya%20Mundra-Kutch,%20370421&t=&z=13&ie=UTF8&iwloc=&output=embed")
+  preloaderEnabled       Boolean @default(true)
+  whatsappEnabled        Boolean @default(true)
+
+  // Company Story Section
+  storyEnabled           Boolean @default(true)
+  storyLabel             String  @default("Sat Saheb Trading Co.")
+  storyTitle             String  @default("Exporting Premium Commodities Worldwide")
+  storyDescription       String  @default("We bridge domestic farms to international markets, delivering uncompromised quality with every container. Operating out of Kutches premier shipping corridor, our logistics efficiency guarantees fresh delivery globally.")
+  storyBtnText           String  @default("Our Company Story")
+  storyBtnLink           String  @default("/about")
+  storyBtnVisible        Boolean @default(true)
+  storyImage             String  @default("/images/story.jpg")
+  storyPillar1Title      String  @default("Premium Sourcing")
+  storyPillar1Desc       String  @default("We procure grains and spices directly from verified cultivation belts across India, ensuring rich nutrient values and authentic flavors.")
+  storyPillar2Title      String  @default("Strict Quality Control")
+  storyPillar2Desc       String  @default("Before shipping, all commodities go through advanced cleaning, grading, sorting, and lab testing parameters to match global guidelines.")
+  storyPillar3Title      String  @default("Logistical Splicing")
+  storyPillar3Desc       String  @default("Our close proximity to Mundra Port enables immediate container customs check, minimal port delays, and rapid shipping turnarounds.")
+  storyPillar4Title      String  @default("Secure Export Packing")
+  storyPillar4Desc       String  @default("Commodities are packed in customized heavy-duty PP, Jute, or vacuum sealed bags to shield goods from moisture and temperature swings.")
+
+  // Featured Products Section
+  featuredProductsEnabled  Boolean @default(true)
+  featuredProductsLabel    String  @default("Verified Sourcing")
+  featuredProductsTitle    String  @default("Special Products for Most People")
+  featuredProductsSubtitle String  @default("Browse our core portfolio of certified export-grade agricultural commodities, carefully cleaned and prepared for international shipping channels.")
+
+  // About Company Section
+  aboutSectionEnabled      Boolean @default(true)
+  aboutSectionLabel        String  @default("About Our Company")
+  aboutSectionTitle        String  @default("A Trusted Worldwide Export Partner")
+  aboutSectionDescription  String  @default("Sat Saheb Trading is a trusted name in the import and export industry, specializing in premium agricultural products for global markets. Our dedication to quality standards and timely delivery has helped us build lasting relationships with clients worldwide, making Sat Saheb Trading a dependable partner in international trade and agricultural exports.")
+  aboutSectionImage        String  @default("/images/map.png")
+  aboutSectionBtnText      String  @default("Read Full Corporate Profile")
+  aboutSectionBtnLink      String  @default("/about")
+  aboutSectionBtnVisible   Boolean @default(true)
+
+  // Global Logistics Section
+  logisticsEnabled         Boolean @default(true)
+  logisticsLabel           String  @default("Global Logistics")
+  logisticsTitle           String  @default("Connecting Farms to Global Ports")
+  logisticsOriginTitle     String  @default("MUNDRA PORT, INDIA (ORIGIN)")
+  logisticsOriginDesc      String  @default("SAT SAHEB TRADING CO. Headquarters & Core Logistics Hub. Directly connected to Mundra Port, Kutches premier trade terminal.")
+  logisticsBgImage         String  @default("/images/logistics-bg.jpg")
+  logisticsMapImage        String  @default("/images/map.png")
+
+  // Global Reviews Section
+  reviewsEnabled           Boolean @default(true)
+  reviewsLabel             String  @default("Global Reviews")
+  reviewsTitle             String  @default("What People Say")
+  reviewsSubtitle          String  @default("Read comments from our trusted trading partners around the globe.")
+
+  // Contact Section
+  contactSectionEnabled    Boolean @default(true)
+  contactSectionLabel      String  @default("Get In Touch")
+  contactSectionTitle      String  @default("Contact Our Trading Desk")
+  contactSectionDescription String @default("Ready to discuss your bulk commodity requirements? Get in touch with our team.")
+  contactFormTitle         String  @default("Send An Inquiry")
+  contactFormSubtitle      String  @default("We typically respond within 1 business day.")
+  contactSuccessMsg        String  @default("Thank you! Your inquiry has been received. Our team will contact you shortly.")
+  contactErrorMsg          String  @default("Failed to submit inquiry. Please try again later.")
+  contactBtnText           String  @default("Submit Inquiry")
+
+  // Footer Settings
+  footerDescription        String  @default("SAT SAHEB TRADING CO. is a premier international agro-commodity trading enterprise, sourcing the finest grains, pulses, and spices from verified farming corridors in India.")
+  footerCopyright          String  @default("© 2026 SAT SAHEB TRADING CO. All rights reserved.")
+  socialFacebook           String  @default("")
+  socialTwitter            String  @default("")
+  socialLinkedIn           String  @default("")
+  socialInstagram          String  @default("")
+  socialYoutube            String  @default("")
+  customSocialName         String  @default("")
+  customSocialUrl          String  @default("")
+  customSocialSvg          String  @default("")
+
+  // Logo & Favicon
+  logo                     String  @default("/images/logo-circular.jpg")
+  favicon                  String  @default("/images/logo-circular.jpg")
+
+  // SEO & Social Share Settings
+  seoTitle                 String  @default("SAT SAHEB TRADING CO.")
+  seoDescription           String  @default("Premium International Agricultural Trading Company, exporting quality grains, pulses, and spices from India to the world.")
+  ogTitle                  String  @default("SAT SAHEB TRADING CO.")
+  ogDescription            String  @default("Premium International Agricultural Trading Company, exporting quality grains, pulses, and spices from India to the world.")
+  ogImage                  String  @default("/images/logo-circular.jpg")
+
+  // About Us Page - Corporate Profile
+  aboutCorporateProfileEnabled    Boolean @default(true)
+  aboutCorporateProfileLabel      String  @default("Corporate Profile")
+  aboutCorporateProfileTitle      String  @default("About Our Company")
+  aboutCorporateProfileDesc       String  @default("Your trusted partner for international trade, delivering excellence, reliability, and value across global markets.")
+  aboutCorporateProfileImage      String  @default("")
+  aboutCorporateProfileParagraphs String  @default("[]") // Serialized JSON array of strings
+
+  // About Us Page - Core Operations
+  aboutCoreOperationsEnabled      Boolean @default(true)
+  aboutCoreOperationsLabel        String  @default("Core Operations")
+  aboutCoreOperationsTitle        String  @default("Trusted Worldwide Export Partner")
+  aboutCoreOperationsDesc1        String  @default("Our extensive network enables us to source and supply a diverse range of products across multiple industries, ensuring that our clients receive the best value, quality, and service. We work closely with manufacturers, suppliers, and international buyers to facilitate seamless trade operations.")
+  aboutCoreOperationsDesc2        String  @default("At Sat Saheb Trading, we believe in delivering excellence through efficient logistics, transparent business practices, and timely delivery. Our mission is to bridge markets, create opportunities, and support the growth of businesses through trusted international trade services.")
+  aboutCards                      String  @default("[]") // Serialized JSON array of cards
+
+  // About Us Page - CTA Section
+  aboutCtaEnabled                 Boolean @default(true)
+  aboutCtaLabel                   String  @default("Global Trade")
+  aboutCtaTitle                   String  @default("Contact Us For Global Trade Solutions")
+  aboutCtaDesc                    String  @default("Have questions about our products or services? Contact our team today and let us discuss how Sat Saheb Trading can support your business worldwide.")
+  aboutCtaPrimaryText             String  @default("Get in Touch")
+  aboutCtaPrimaryLink             String  @default("/contact")
+  aboutCtaSecondaryText           String  @default("Email Inquiry")
+  aboutCtaSecondaryLink           String  @default("mailto:info@satsahebtrading.com")
+  aboutCtaBgImage                 String  @default("")
+
+  // Inquiry Form & Footer links
+  formFields                      String  @default("[]") // Serialized JSON array of fields
+  footerLinks                     String  @default("[]") // Serialized JSON array of footer links
+
+  // SECTION 2 - Get In Touch Details
+  contactOfficeTitle              String  @default("REGISTERED OFFICE ADDRESS")
+  contactPhones                   String  @default("[]") // JSON string of phone numbers list
+  contactEmails                   String  @default("[]") // JSON string of emails list
+
+  // SECTION 3 - Footer Categories
+  footerCategories                String  @default("[]") // JSON string of footer categories and nested links
+
+  // SECTION 4 - Product Page Content
+  productPageLabel                String  @default("Import Export Portfolio")
+  productPageTitle                String  @default("Our Commodities")
+  productPageDescription          String  @default("Browse our verified inventory of high-quality grains, pulses, and spices sourced directly from fertile cultivation belts across India.")
+
+  // SECTION 5 - Gallery Page Content
+  galleryPageLabel                String  @default("Visual Registry")
+  galleryPageTitle                String  @default("Corporate Gallery")
+  galleryPageDescription          String  @default("A premium collection of our verified agricultural products and cargo consignments. All images are managed from the admin dashboard.")
+
+  // SECTION 7 - Contact Page Content
+  contactPageLabel                String  @default("Connect")
+  contactPageTitle                String  @default("Let's Connect")
+  contactPageDescription          String  @default("Have questions or business inquiries? Our global trade desk is ready to assist you with reliable import-export solutions.")
+
+  // SECTION 8 - Social Link List
+  socialLinksList                 String  @default("[]") // JSON list of {id, platform, url, isEnabled, order, isCustom, customIconUrl}
+}
+
+model ThemeSettings {
+  id            Int      @id @default(1)
+  themeName     String   @default("theme-premium-green")
+  primaryColor  String   @default("#06402b")
+  secondaryColor String   @default("#d69317")
+  accentColor   String   @default("#f3f4f6")
+  bgPrimary     String   @default("#ffffff")
+  bgSecondary   String   @default("#f9fafb")
+  textPrimary   String   @default("#111827")
+  textSecondary String   @default("#4b5563")
+  buttonStyle   String   @default("editorial")
+  updatedAt     DateTime @updatedAt
+}
+
+model HeroSlide {
+  id               Int      @id @default(autoincrement())
+  title            String
+  subtitle         String
+  description      String
+  imageUrl         String
+  mobileImageUrl   String?
+  primaryCtaText   String?
+  primaryCtaLink   String?
+  secondaryCtaText String?
+  secondaryCtaLink String?
+  alignment        String   @default("left")
+  order            Int      @default(0)
+  isEnabled        Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model Category {
+  id          Int       @id @default(autoincrement())
+  name        String    @unique
+  slug        String    @unique
+  description String?
+  products    Product[]
+}
+
+model Product {
+  id              Int            @id @default(autoincrement())
+  title           String
+  slug            String         @unique
+  featuredImage   String
+  overview        String
+  description     String
+  specifications  String         @default("[]") // Serialized JSON array of key-value maps
+  categoryId      Int
+  category        Category       @relation(fields: [categoryId], references: [id])
+  images          ProductImage[]
+  metaTitle       String?
+  metaDescription String?
+  isEnabled       Boolean        @default(true)
+  isFeatured      Boolean        @default(true)
+  order           Int            @default(0)
+  featuredOrder   Int            @default(0)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+}
+
+model ProductImage {
+  id        Int      @id @default(autoincrement())
+  url       String
+  productId Int
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+}
+
+model Partner {
+  id          Int      @id @default(autoincrement())
+  name        String
+  role        String   @default("Founder & Managing Partner")
+  description String   @default("")
+  phone       String?  @default("")
+  imageUrl    String
+  order       Int      @default(0)
+  isVisible   Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Testimonial {
+  id        Int      @id @default(autoincrement())
+  name      String
+  role      String?  @default("")
+  company   String?  @default("")
+  location  String?  @default("")
+  imageUrl  String?  @default("")
+  review    String
+  rating    Int      @default(5)
+  order     Int      @default(0)
+  isEnabled Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Inquiry {
+  id              Int      @id @default(autoincrement())
+  name            String
+  email           String
+  phone           String
+  company         String?
+  country         String?
+  state           String?  @default("")
+  productInterest String?
+  message         String
+  isRead          Boolean  @default(false)
+  isReplied       Boolean  @default(false)
+  status          String   @default("New")
+  dynamicValues   String?  @default("{}") // Serialized JSON string
+  createdAt       DateTime @default(now())
+}
+
+model LogisticsNode {
+  id        Int      @id @default(autoincrement())
+  name      String
+  xCoord    Float
+  yCoord    Float
+  info      String
+  type      String   // "hub" or "destination"
+  isEnabled Boolean  @default(true)
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model GalleryImage {
+  id        Int      @id @default(autoincrement())
+  title     String
+  caption   String?  @default("")
+  url       String
+  category  String   @default("General")
+  order     Int      @default(0)
+  isEnabled Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
