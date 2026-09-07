@@ -40,6 +40,7 @@ import {
   Key
 } from 'lucide-react'
 import { auth, firestore } from '@/lib/firebase'
+import { adminClientFetch as fetch } from '@/lib/adminClientFetch'
 
 // Define typings based on Prisma models
 interface SettingsData {
@@ -473,10 +474,10 @@ export default function AdminDashboard({
   // Fetch users when active tab becomes users
   useEffect(() => {
     if (activeTab === 'users') {
-      fetch('/api/admin/users')
-        .then(res => res.json())
-        .then(data => {
-          if (data.users) setUserList(data.users)
+      import('@/lib/firebaseClientOperations')
+        .then(({ listAdminUsersBrowser }) => listAdminUsersBrowser())
+        .then(users => {
+          setUserList(users)
         })
         .catch(err => {
           console.error('Failed to retrieve administrators list', err)
@@ -607,19 +608,13 @@ export default function AdminDashboard({
   }
 
   const handleUploadImage = async (file: File, folder: 'products' | 'partners' | 'slides' | 'logo' | 'gallery') => {
-    const formData = new FormData()
-    formData.append('file', file)
-    formData.append('folder', folder)
     try {
-      const res = await fetch('/api/admin/upload', {
-        method: 'POST',
-        body: formData,
-      })
-      if (!res.ok) throw new Error()
-      const data = await res.json()
-      return data.url as string
-    } catch {
-      showToast('error', 'Image upload failed')
+      const { uploadToCloudinaryBrowser } = await import('@/lib/firebaseClientOperations')
+      const url = await uploadToCloudinaryBrowser(file, folder)
+      return url
+    } catch (err: any) {
+      console.error('Upload failed:', err)
+      showToast('error', err.message || 'Image upload failed')
       return null
     }
   }
@@ -679,9 +674,13 @@ export default function AdminDashboard({
   // LOGOUT
   const handleLogout = async () => {
     try {
-      await fetch('/api/admin/auth', { method: 'DELETE' })
-      router.push('/admin/login')
-      router.refresh()
+      const { signOut } = await import('firebase/auth')
+      await signOut(auth)
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('sst_admin_logged_in')
+        localStorage.removeItem('sst_admin_email')
+      }
+      router.push('/admin/login/')
     } catch {
       showToast('error', 'Logout failed')
     }
@@ -6067,18 +6066,8 @@ export default function AdminDashboard({
                         if (!file) return
                         setProfileLoading(true)
                         try {
-                          const formData = new FormData()
-                          formData.append('file', file)
-                          formData.append('folder', 'logo')
-                          const res = await fetch('/api/admin/upload', {
-                            method: 'POST',
-                            body: formData
-                          })
-                          const data = await res.json()
-                          if (!res.ok || !data.url) {
-                            throw new Error(data.error || 'Upload failed')
-                          }
-                          const newUrl = data.url
+                          const { uploadToCloudinaryBrowser } = await import('@/lib/firebaseClientOperations')
+                          const newUrl = await uploadToCloudinaryBrowser(file, 'logo')
                           setProfileImage(newUrl)
 
                           const currentUser = auth.currentUser
@@ -6135,13 +6124,6 @@ export default function AdminDashboard({
                   // Save name directly to Firestore (client-side, persists across refresh)
                   const { doc, setDoc } = await import('firebase/firestore')
                   await setDoc(doc(firestore, 'users', currentUser.uid), { name: profileName, updatedAt: new Date().toISOString() }, { merge: true })
-
-                  // Also update via API for backwards compatibility
-                  await fetch('/api/admin/users', {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ uid: currentUser.uid, name: profileName })
-                  })
 
                   showToast('success', 'Profile saved successfully')
                 } catch (err: any) {
@@ -6364,30 +6346,10 @@ export default function AdminDashboard({
                   e.preventDefault()
                   setSaving(true)
                   try {
-                    const res = await fetch('/api/admin/users', {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify(newUser)
-                    })
-                    const data = await res.json()
-                    if (!res.ok) throw new Error(data.error || 'Failed to create user')
+                    const { createAdminUserBrowser } = await import('@/lib/firebaseClientOperations')
+                    const createdUser = await createAdminUserBrowser(newUser)
 
-                    // Write user profile to Firestore from client-side where we have permission context
-                    const { doc, setDoc } = await import('firebase/firestore')
-                    const userDocRef = doc(firestore, 'users', data.user.uid)
-                    await setDoc(userDocRef, {
-                      uid: data.user.uid,
-                      email: data.user.email,
-                      name: data.user.name,
-                      role: data.user.role,
-                      status: data.user.status,
-                      profileImageUrl: '',
-                      permissions: data.user.permissions,
-                      createdAt: new Date().toISOString(),
-                      updatedAt: new Date().toISOString()
-                    })
-
-                    setUserList(prev => [...prev, data.user])
+                    setUserList(prev => [...prev, createdUser])
                     setShowAddUser(false)
                     setNewUser({
                       name: '',
@@ -6525,16 +6487,6 @@ export default function AdminDashboard({
                   e.preventDefault()
                   setSaving(true)
                   try {
-                    const res = await fetch('/api/admin/users', {
-                      method: 'PUT',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify(editingUser)
-                    })
-                    if (!res.ok) {
-                      const data = await res.json()
-                      throw new Error(data.error || 'Failed to update user')
-                    }
-
                     // Update user profile to Firestore from client-side where we have permission context
                     const { doc, setDoc } = await import('firebase/firestore')
                     const userDocRef = doc(firestore, 'users', editingUser.uid)
@@ -6685,10 +6637,6 @@ export default function AdminDashboard({
                                 onClick={async () => {
                                   if (!confirm(`Are you sure you want to delete administrator ${userObj.name}?`)) return
                                   try {
-                                    const res = await fetch(`/api/admin/users?uid=${userObj.uid}`, { method: 'DELETE' })
-                                    const data = await res.json()
-                                    if (!res.ok) throw new Error(data.error || 'Failed to delete user')
-
                                     // Delete user profile from Firestore from client-side where we have permission context
                                     const { doc, deleteDoc } = await import('firebase/firestore')
                                     const userDocRef = doc(firestore, 'users', userObj.uid)

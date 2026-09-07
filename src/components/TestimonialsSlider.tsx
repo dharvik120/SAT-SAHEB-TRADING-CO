@@ -1,6 +1,8 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import { collection, onSnapshot } from 'firebase/firestore'
+import { firestore } from '@/lib/firebase'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Quote, ArrowLeft, ArrowRight, Star } from 'lucide-react'
 
@@ -15,7 +17,27 @@ interface TestimonialsSliderProps {
   testimonials: Testimonial[]
 }
 
-export default function TestimonialsSlider({ testimonials }: TestimonialsSliderProps) {
+export default function TestimonialsSlider({ testimonials: initialTestimonials }: TestimonialsSliderProps) {
+  const [testimonials, setTestimonials] = useState<Testimonial[]>(initialTestimonials)
+
+  useEffect(() => {
+    try {
+      const unsub = onSnapshot(collection(firestore, 'testimonials'), (snap) => {
+        if (!snap.empty) {
+          const fresh: any[] = []
+          snap.forEach((doc) => {
+            const data = doc.data()
+            if (data.isEnabled !== false) fresh.push({ id: doc.id, ...data })
+          })
+          fresh.sort((a, b) => (a.order || 0) - (b.order || 0))
+          if (fresh.length > 0) setTestimonials(fresh)
+        }
+      })
+      return () => unsub()
+    } catch (e) {
+      console.warn('TestimonialsSlider live listener bypassed:', e)
+    }
+  }, [])
   const [current, setCurrent] = useState(0)
   const [direction, setDirection] = useState(0) // -1 for left, 1 for right
   const timerRef = useRef<NodeJS.Timeout | null>(null)

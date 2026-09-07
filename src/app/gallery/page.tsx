@@ -1,7 +1,7 @@
 import { getWebsiteSettings, getGalleryImages } from '@/lib/firebaseDb'
 import GalleryClient from './GalleryClient'
 
-export const revalidate = 0
+export const dynamic = 'force-static'
 
 export default async function GalleryPage() {
   const allImages = await getGalleryImages()
@@ -10,7 +10,7 @@ export default async function GalleryPage() {
   const settings = await getWebsiteSettings()
 
   // Get distinct categories for filter tabs
-  const allCategories = ['All', ...Array.from(new Set(images.map(img => img.category).filter(Boolean)))]
+  const allCategories: string[] = ['All', ...Array.from<string>(new Set(images.map((img: any) => String(img.category)).filter(Boolean)))]
 
   return (
     <GalleryClient
@@ -22,3 +22,4 @@ export default async function GalleryPage() {
     />
   )
 }
+

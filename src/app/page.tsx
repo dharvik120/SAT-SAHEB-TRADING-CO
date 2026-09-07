@@ -16,7 +16,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { CheckCircle2, ShieldCheck, Truck, Award } from 'lucide-react'
 
-export const revalidate = 0 // Disable cache to reflect admin changes instantly
+export const dynamic = 'force-static'
 
 export default async function HomePage() {
   // Fetch data from Firebase Firestore
@@ -122,7 +122,7 @@ export default async function HomePage() {
           
           {/* Featured products grid without tabs */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8">
-            {products.map((prod, index) => (
+            {products.map((prod: any, index: number) => (
               <ProductCard
                 key={prod.id}
                 id={prod.id}
@@ -328,3 +328,4 @@ export default async function HomePage() {
     </div>
   )
 }
+

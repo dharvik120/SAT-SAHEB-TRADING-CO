@@ -1,7 +1,7 @@
-import { getWebsiteSettings, getProducts, getCategories } from '@/lib/firebaseDb'
+﻿import { getWebsiteSettings, getProducts, getCategories } from '@/lib/firebaseDb'
 import ProductShowcase from '@/components/ProductShowcase'
 
-export const revalidate = 0 // Disable cache for instant update reflection
+export const dynamic = 'force-static'
 
 export default async function ProductsPage() {
   const categories = await getCategories()
@@ -43,3 +43,4 @@ export default async function ProductsPage() {
     </div>
   )
 }
+

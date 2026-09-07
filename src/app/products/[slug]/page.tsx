@@ -4,7 +4,14 @@ import Link from 'next/link'
 import { ArrowLeft, ArrowRight, MessageSquare, PhoneCall } from 'lucide-react'
 import ProductGallery from '@/components/ProductGallery'
 
-export const revalidate = 0 // Disable cache for instant updates
+export const dynamic = 'force-static'
+
+export async function generateStaticParams() {
+  const products = await getProducts()
+  return products.map((p: any) => ({
+    slug: p.slug || String(p.id),
+  }))
+}
 
 interface ProductPageProps {
   params: {

@@ -1,6 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { collection, onSnapshot } from 'firebase/firestore'
+import { firestore } from '@/lib/firebase'
 import { motion } from 'framer-motion'
 import { Globe, Ship, Anchor, CheckCircle } from 'lucide-react'
 
@@ -61,10 +63,32 @@ export default function InteractiveMap({
   logisticsTitle,
   logisticsOriginTitle,
   logisticsOriginDesc,
-  nodes = []
+  nodes: initialNodes = []
 }: InteractiveMapProps) {
-  const displayNodes: TradeNode[] = nodes && nodes.length > 0
-    ? nodes.map((n) => ({
+  const [liveNodes, setLiveNodes] = useState<any[]>(initialNodes)
+
+  useEffect(() => {
+    try {
+      const unsub = onSnapshot(collection(firestore, 'logisticsNodes'), (snap) => {
+        if (!snap.empty) {
+          const fresh: any[] = []
+          snap.forEach((doc) => {
+            const data = doc.data()
+            if (data.isEnabled !== false) fresh.push({ id: doc.id, ...data })
+          })
+          fresh.sort((a, b) => (a.order || 0) - (b.order || 0))
+          if (fresh.length > 0) setLiveNodes(fresh)
+        }
+      })
+      return () => unsub()
+    } catch (e) {
+      console.warn('InteractiveMap live listener bypassed:', e)
+    }
+  }, [])
+
+  const currentNodes = liveNodes.length > 0 ? liveNodes : initialNodes
+  const displayNodes: TradeNode[] = currentNodes && currentNodes.length > 0
+    ? currentNodes.map((n) => ({
         id: String(n.id),
         name: n.name,
         coordinates: { x: n.xCoord, y: n.yCoord },

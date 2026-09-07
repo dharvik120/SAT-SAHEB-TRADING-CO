@@ -1,6 +1,8 @@
 'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
+import { collection, onSnapshot } from 'firebase/firestore'
+import { firestore } from '@/lib/firebase'
 import { motion, AnimatePresence } from 'framer-motion'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -23,7 +25,27 @@ interface HeroSliderProps {
   slides: SlideData[]
 }
 
-export default function HeroSlider({ slides }: HeroSliderProps) {
+export default function HeroSlider({ slides: initialSlides }: HeroSliderProps) {
+  const [slides, setSlides] = useState<SlideData[]>(initialSlides)
+
+  useEffect(() => {
+    try {
+      const unsub = onSnapshot(collection(firestore, 'heroSlides'), (snap) => {
+        if (!snap.empty) {
+          const fresh: any[] = []
+          snap.forEach((doc) => {
+            const data = doc.data()
+            if (data.isEnabled !== false) fresh.push({ id: doc.id, ...data })
+          })
+          fresh.sort((a, b) => (a.order || 0) - (b.order || 0))
+          if (fresh.length > 0) setSlides(fresh)
+        }
+      })
+      return () => unsub()
+    } catch (e) {
+      console.warn('HeroSlider live listener bypassed:', e)
+    }
+  }, [])
   const [current, setCurrent] = useState(0)
   const [direction, setDirection] = useState(0) // -1 for left, 1 for right
   const timerRef = useRef<NodeJS.Timeout | null>(null)

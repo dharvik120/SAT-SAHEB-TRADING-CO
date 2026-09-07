@@ -1,5 +1,3 @@
-import { redirect } from 'next/navigation'
-import { getSession } from '@/lib/auth'
 import { 
   getWebsiteSettings, 
   getThemeSettings, 
@@ -12,18 +10,12 @@ import {
   getLogisticsNodes, 
   getGalleryImages
 } from '@/lib/firebaseDb'
-import AdminDashboard from '@/components/AdminDashboard'
+import AdminClientWrapper from './AdminClientWrapper'
 
-export const revalidate = 0 // Disable cache for admin operations
+export const dynamic = 'force-static'
 
 export default async function AdminPage() {
-  // 1. Secure Server-Side Session check
-  const session = getSession()
-  if (!session) {
-    redirect('/admin/login')
-  }
-
-  // 2. Query all database collections for the administrator dashboard panels from Firebase
+  // Query all database collections for the administrator dashboard panels from Firebase
   const settings = await getWebsiteSettings()
   const theme = await getThemeSettings()
   const slides = await getHeroSlides()
@@ -35,9 +27,8 @@ export default async function AdminPage() {
   const nodes = await getLogisticsNodes()
   const gallery = await getGalleryImages()
 
-  // 3. Render client side interactive dashboard container
   return (
-    <AdminDashboard
+    <AdminClientWrapper
       initialSettings={settings}
       initialTheme={theme}
       initialSlides={slides}
@@ -48,7 +39,6 @@ export default async function AdminPage() {
       initialInquiries={inquiries}
       initialNodes={nodes}
       initialGallery={gallery}
-      username={session.name || session.email}
     />
   )
 }

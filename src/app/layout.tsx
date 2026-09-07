@@ -1,11 +1,11 @@
 import type { Metadata } from 'next'
 import '@/app/globals.css'
-import { db } from '@/lib/db'
+import { getWebsiteSettings, getThemeSettings } from '@/lib/firebaseDb'
 import LayoutWrapper from '@/components/LayoutWrapper'
 
 export async function generateMetadata(): Promise<Metadata> {
   try {
-    const settings = await db.websiteSettings.findUnique({ where: { id: 1 } })
+    const settings = await getWebsiteSettings()
     return {
       title: {
         default: settings?.seoTitle || settings?.companyName || 'SAT SAHEB TRADING CO.',
@@ -41,8 +41,8 @@ export default async function RootLayout({
   let theme = null
 
   try {
-    settings = await db.websiteSettings.findUnique({ where: { id: 1 } })
-    theme = await db.themeSettings.findUnique({ where: { id: 1 } })
+    settings = await getWebsiteSettings()
+    theme = await getThemeSettings()
   } catch (error) {
     console.error('Database connection failed in RootLayout, using fallback settings.', error)
   }

@@ -1,9 +1,9 @@
-import { PrismaClient } from '@prisma/client'
-
-const globalForPrisma = globalThis as unknown as {
-  prisma: PrismaClient | undefined
+// Hostinger Premium Static Build Safe Database Shim
+// Prevents SQLite/Prisma from executing or bundling in production
+const emptyHandler: ProxyHandler<any> = {
+  get: () => () => Promise.resolve(null),
 }
 
-export const db = globalForPrisma.prisma ?? new PrismaClient()
-
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = db
+export const db: any = new Proxy({}, {
+  get: () => new Proxy({}, emptyHandler),
+})

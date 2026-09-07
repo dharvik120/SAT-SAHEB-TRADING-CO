@@ -57,22 +57,17 @@ export default function AdminLoginPage() {
         return
       }
 
-      // 2. FIREBASE MODE: Firebase email & password authentication
+      // Pure Client-Side Firebase Authentication
       const userCredential = await signInWithEmailAndPassword(auth, loginEmail, password)
       const user = userCredential.user
-      const idToken = await user.getIdToken()
 
-      // Post ID Token to backend to start cookie session
-      const response = await fetch('/api/admin/auth', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ idToken }),
-      })
-      const data = await response.json()
-      if (!response.ok) throw new Error(data.error || 'Backend session initialization failed')
+      // Store client session indicator for static guard
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('sst_admin_logged_in', 'true')
+        localStorage.setItem('sst_admin_email', user.email || '')
+      }
 
-      router.push('/admin')
-      router.refresh()
+      router.push('/admin/')
     } catch (e: any) {
       setError(e.message || 'Invalid email or password')
       setLoading(false)

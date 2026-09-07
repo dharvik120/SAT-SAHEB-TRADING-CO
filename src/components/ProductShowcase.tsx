@@ -1,21 +1,25 @@
-'use client'
+﻿'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { collection, onSnapshot } from 'firebase/firestore'
+import { firestore } from '@/lib/firebase'
 import { motion, AnimatePresence } from 'framer-motion'
 import ProductCard from './ProductCard'
 
 interface Category {
-  id: number
+  id: number | string
   name: string
   slug: string
 }
 
 interface Product {
-  id: number
+  id: number | string
   title: string
   slug: string
   featuredImage: string
   category: Category
+  categoryId?: number | string
+  isEnabled?: boolean
 }
 
 interface ProductShowcaseProps {
@@ -23,12 +27,59 @@ interface ProductShowcaseProps {
   categories: Category[]
 }
 
-export default function ProductShowcase({ products, categories }: ProductShowcaseProps) {
+export default function ProductShowcase({ products: initialProducts, categories: initialCategories }: ProductShowcaseProps) {
+  const [products, setProducts] = useState<Product[]>(initialProducts)
+  const [categories, setCategories] = useState<Category[]>(initialCategories)
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
+
+  // Real-time listener for products and categories changes from Firestore
+  useEffect(() => {
+    try {
+      const unsubProd = onSnapshot(collection(firestore, 'products'), (prodSnap) => {
+        if (!prodSnap.empty) {
+          const freshProducts: any[] = []
+          prodSnap.forEach((doc) => {
+            const data = doc.data()
+            if (data.isEnabled !== false) {
+              freshProducts.push({ id: doc.id, ...data })
+            }
+          })
+          
+          setProducts((current) => {
+            const mapped = freshProducts.map((p) => {
+              const cat = categories.find((c) => c.id?.toString() === p.categoryId?.toString())
+              return {
+                ...p,
+                category: cat || { id: 'general', name: 'General', slug: 'general' }
+              }
+            })
+            return mapped.length > 0 ? mapped : current
+          })
+        }
+      })
+
+      const unsubCat = onSnapshot(collection(firestore, 'categories'), (catSnap) => {
+        if (!catSnap.empty) {
+          const freshCats: Category[] = []
+          catSnap.forEach((doc) => {
+            freshCats.push({ id: doc.id, ...doc.data() } as Category)
+          })
+          if (freshCats.length > 0) setCategories(freshCats)
+        }
+      })
+
+      return () => {
+        unsubProd()
+        unsubCat()
+      }
+    } catch (err) {
+      console.warn('Firestore live listener bypassed:', err)
+    }
+  }, [categories])
 
   const filteredProducts = selectedCategory === 'all'
     ? products
-    : products.filter(p => p.category.slug === selectedCategory)
+    : products.filter(p => p.category?.slug === selectedCategory)
 
   return (
     <div className="flex flex-col gap-12">
@@ -75,11 +126,11 @@ export default function ProductShowcase({ products, categories }: ProductShowcas
               transition={{ duration: 0.4 }}
             >
               <ProductCard
-                id={prod.id}
+                id={typeof prod.id === 'number' ? prod.id : index + 1}
                 title={prod.title}
                 slug={prod.slug}
                 featuredImage={prod.featuredImage}
-                categoryName={prod.category.name}
+                categoryName={prod.category?.name || 'General'}
                 index={index}
               />
             </motion.div>

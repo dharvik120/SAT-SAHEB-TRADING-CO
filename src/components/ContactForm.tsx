@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Loader2, CheckCircle2, AlertTriangle } from 'lucide-react'
 
 interface FormField {
@@ -37,17 +37,38 @@ const DEFAULT_FIELDS: FormField[] = [
 
 export default function ContactForm({
   fields,
-  products,
+  products: initialProducts,
   title,
   subtitle,
   successMsg,
   errorMsg,
   buttonText
 }: ContactFormProps) {
+  const [products, setProducts] = useState<any[]>(initialProducts)
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
   const [errorMessage, setErrorMessage] = useState('')
   const [formData, setFormData] = useState<Record<string, any>>({})
   const [errors, setErrors] = useState<Record<string, string>>({})
+
+  useEffect(() => {
+    try {
+      const { collection, onSnapshot } = require('firebase/firestore')
+      const { firestore } = require('@/lib/firebase')
+      const unsub = onSnapshot(collection(firestore, 'products'), (snap: any) => {
+        if (!snap.empty) {
+          const fresh: any[] = []
+          snap.forEach((doc: any) => {
+            const data = doc.data()
+            if (data.isEnabled !== false) fresh.push({ id: doc.id, ...data })
+          })
+          if (fresh.length > 0) setProducts(fresh)
+        }
+      })
+      return () => unsub()
+    } catch (e) {
+      console.warn('ContactForm products live listener bypassed:', e)
+    }
+  }, [])
 
   // Parse fields JSON or use fallback
   let parsedFields: FormField[] = []
@@ -104,16 +125,8 @@ export default function ContactForm({
     setErrorMessage('')
 
     try {
-      const response = await fetch('/api/inquire', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      })
-      const result = await response.json()
-      
-      if (!response.ok) {
-        throw new Error(result.error || errorMsg || 'Failed to submit form')
-      }
+      const { submitInquiryBrowser } = await import('@/lib/firebaseClientOperations')
+      await submitInquiryBrowser(formData)
       
       setStatus('success')
       setFormData({})

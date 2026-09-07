@@ -1,12 +1,14 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { collection, onSnapshot } from 'firebase/firestore'
+import { firestore } from '@/lib/firebase'
 import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Maximize2, X } from 'lucide-react'
 
 interface GalleryImageData {
-  id: number
+  id: number | string
   title: string
   caption?: string | null
   url: string
@@ -23,9 +25,34 @@ interface Props {
   pageDescription?: string
 }
 
-export default function GalleryClient({ images, categories, pageLabel, pageTitle, pageDescription }: Props) {
+export default function GalleryClient({ images: initialImages, categories: initialCategories, pageLabel, pageTitle, pageDescription }: Props) {
+  const [images, setImages] = useState<GalleryImageData[]>(initialImages)
+  const [categories, setCategories] = useState<string[]>(initialCategories)
   const [selectedImg, setSelectedImg] = useState<GalleryImageData | null>(null)
   const [activeCategory, setActiveCategory] = useState<string>('All')
+
+  useEffect(() => {
+    try {
+      const unsub = onSnapshot(collection(firestore, 'galleryImages'), (snap) => {
+        if (!snap.empty) {
+          const fresh: any[] = []
+          snap.forEach((doc) => {
+            const data = doc.data()
+            if (data.isEnabled !== false) fresh.push({ id: doc.id, ...data })
+          })
+          fresh.sort((a, b) => (a.order || 0) - (b.order || 0))
+          if (fresh.length > 0) {
+            setImages(fresh)
+            const cats = ['All', ...Array.from(new Set(fresh.map(img => img.category).filter(Boolean)))]
+            setCategories(cats)
+          }
+        }
+      })
+      return () => unsub()
+    } catch (e) {
+      console.warn('GalleryClient live listener bypassed:', e)
+    }
+  }, [])
 
   const filtered = activeCategory === 'All'
     ? images

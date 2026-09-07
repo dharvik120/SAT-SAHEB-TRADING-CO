@@ -1,8 +1,8 @@
-import { getWebsiteSettings, getProducts } from '@/lib/firebaseDb'
+﻿import { getWebsiteSettings, getProducts } from '@/lib/firebaseDb'
 import ContactForm from '@/components/ContactForm'
 import { Phone, Mail, MapPin, Clock } from 'lucide-react'
 
-export const revalidate = 0 // Disable cache for instant update reflection
+export const dynamic = 'force-static'
 
 export default async function ContactPage() {
   let settings = null
@@ -180,3 +180,4 @@ export default async function ContactPage() {
     </div>
   )
 }
+
