@@ -601,6 +601,148 @@ export default function AdminDashboard({
     setSocialLinksList(parsedSocials)
   })
 
+  // REAL-TIME FIRESTORE SYNC: Keep AdminDashboard live-updated across refreshes and multiple tabs
+  useEffect(() => {
+    let unsubSettings: (() => void) | null = null
+    let unsubTheme: (() => void) | null = null
+    let unsubProducts: (() => void) | null = null
+    let unsubSlides: (() => void) | null = null
+    let unsubCategories: (() => void) | null = null
+    let unsubPartners: (() => void) | null = null
+    let unsubTestimonials: (() => void) | null = null
+    let unsubInquiries: (() => void) | null = null
+    let unsubGallery: (() => void) | null = null
+    let unsubNodes: (() => void) | null = null
+
+    try {
+      import('firebase/firestore').then(({ doc, collection, onSnapshot }) => {
+        // 1. Settings
+        unsubSettings = onSnapshot(doc(firestore, 'websiteSettings', 'id_1'), (snap) => {
+          if (snap.exists()) {
+            const data = snap.data() as any
+            setSettings(prev => ({ ...prev, ...data }))
+            if (data.aboutCards) {
+              try { setAboutCards(JSON.parse(data.aboutCards)) } catch (e) {}
+            }
+            if (data.formFields) {
+              try { setFormFields(JSON.parse(data.formFields)) } catch (e) {}
+            }
+            if (data.footerLinks) {
+              try { setFooterLinks(JSON.parse(data.footerLinks)) } catch (e) {}
+            }
+            if (data.contactPhones) {
+              try { setContactPhones(JSON.parse(data.contactPhones)) } catch (e) {}
+            }
+            if (data.contactEmails) {
+              try { setContactEmails(JSON.parse(data.contactEmails)) } catch (e) {}
+            }
+            if (data.footerCategories) {
+              try { setFooterCategories(JSON.parse(data.footerCategories)) } catch (e) {}
+            }
+            if (data.socialLinksList) {
+              try { setSocialLinksList(JSON.parse(data.socialLinksList)) } catch (e) {}
+            }
+          }
+        })
+
+        // 2. Theme
+        unsubTheme = onSnapshot(doc(firestore, 'themeSettings', 'id_1'), (snap) => {
+          if (snap.exists()) {
+            setTheme(prev => ({ ...prev, ...snap.data() } as any))
+          }
+        })
+
+        // 3. Products
+        unsubProducts = onSnapshot(collection(firestore, 'products'), (snap) => {
+          if (!snap.empty) {
+            const prods: any[] = []
+            snap.forEach(d => prods.push({ id: d.id, ...d.data() }))
+            prods.sort((a, b) => (a.order || 0) - (b.order || 0))
+            setProducts(prods)
+          }
+        })
+
+        // 4. Hero Slides
+        unsubSlides = onSnapshot(collection(firestore, 'heroSlides'), (snap) => {
+          if (!snap.empty) {
+            const s: any[] = []
+            snap.forEach(d => s.push({ id: d.id, ...d.data() }))
+            s.sort((a, b) => (a.order || 0) - (b.order || 0))
+            setSlides(s)
+          }
+        })
+
+        // 5. Categories
+        unsubCategories = onSnapshot(collection(firestore, 'categories'), (snap) => {
+          if (!snap.empty) {
+            const cats: any[] = []
+            snap.forEach(d => cats.push({ id: d.id, ...d.data() }))
+            setCategories(cats)
+          }
+        })
+
+        // 6. Partners
+        unsubPartners = onSnapshot(collection(firestore, 'partners'), (snap) => {
+          if (!snap.empty) {
+            const parts: any[] = []
+            snap.forEach(d => parts.push({ id: d.id, ...d.data() }))
+            parts.sort((a, b) => (a.order || 0) - (b.order || 0))
+            setPartners(parts)
+          }
+        })
+
+        // 7. Testimonials
+        unsubTestimonials = onSnapshot(collection(firestore, 'testimonials'), (snap) => {
+          if (!snap.empty) {
+            const tests: any[] = []
+            snap.forEach(d => tests.push({ id: d.id, ...d.data() }))
+            tests.sort((a, b) => (a.order || 0) - (b.order || 0))
+            setTestimonials(tests)
+          }
+        })
+
+        // 8. Inquiries
+        unsubInquiries = onSnapshot(collection(firestore, 'inquiries'), (snap) => {
+          const inqs: any[] = []
+          snap.forEach(d => inqs.push({ id: d.id, ...d.data() }))
+          inqs.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime())
+          setInquiries(inqs)
+        })
+
+        // 9. Gallery
+        unsubGallery = onSnapshot(collection(firestore, 'galleryImages'), (snap) => {
+          const gals: any[] = []
+          snap.forEach(d => gals.push({ id: d.id, ...d.data() }))
+          gals.sort((a, b) => (a.order || 0) - (b.order || 0))
+          setGallery(gals)
+        })
+
+        // 10. Logistics Nodes
+        unsubNodes = onSnapshot(collection(firestore, 'logisticsNodes'), (snap) => {
+          const nds: any[] = []
+          snap.forEach(d => nds.push({ id: d.id, ...d.data() }))
+          nds.sort((a, b) => (a.order || 0) - (b.order || 0))
+          setNodes(nds)
+        })
+      })
+    } catch (e) {
+      console.warn('AdminDashboard live listener initialization skipped:', e)
+    }
+
+    return () => {
+      if (unsubSettings) unsubSettings()
+      if (unsubTheme) unsubTheme()
+      if (unsubProducts) unsubProducts()
+      if (unsubSlides) unsubSlides()
+      if (unsubCategories) unsubCategories()
+      if (unsubPartners) unsubPartners()
+      if (unsubTestimonials) unsubTestimonials()
+      if (unsubInquiries) unsubInquiries()
+      if (unsubGallery) unsubGallery()
+      if (unsubNodes) unsubNodes()
+    }
+  }, [])
+
 
   const showToast = (type: 'success' | 'error', msg: string) => {
     setToast({ type, msg })
