@@ -179,6 +179,7 @@ export default function Footer({ settings }: FooterProps) {
                   <li key={link.id || lIdx}>
                     <Link
                       href={link.url}
+                      prefetch={true}
                       target={link.openInNewTab ? '_blank' : undefined}
                       className="hover:text-white transition-colors duration-200 flex items-center gap-1 group"
                     >

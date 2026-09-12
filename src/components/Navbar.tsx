@@ -58,7 +58,7 @@ export default function Navbar({ settings }: NavbarProps) {
       >
         <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
           {/* Logo Brand */}
-          <Link href="/" className="relative flex items-center gap-3 group">
+          <Link href="/" prefetch={true} className="relative flex items-center gap-3 group">
             <div className="relative transition-transform duration-300 group-hover:scale-105">
               <Image
                 src={logoUrl}
@@ -81,6 +81,7 @@ export default function Navbar({ settings }: NavbarProps) {
                 <Link
                   key={link.name}
                   href={link.href}
+                  prefetch={true}
                   className="relative font-sans text-sm tracking-wider uppercase font-medium overflow-hidden group py-2"
                 >
                   <span
@@ -109,6 +110,7 @@ export default function Navbar({ settings }: NavbarProps) {
           <div className="hidden md:flex items-center gap-4">
             <Link
               href="/contact"
+              prefetch={true}
               className={`px-5 py-2.5 text-xs font-sans font-semibold uppercase tracking-wider rounded-none border transition-all duration-300 flex items-center gap-1.5 group ${
                 isHome && !scrolled
                   ? 'border-white text-white hover:bg-white hover:text-primary'
@@ -164,6 +166,7 @@ export default function Navbar({ settings }: NavbarProps) {
                   >
                     <Link
                       href={link.href}
+                      prefetch={true}
                       className={`text-2xl font-serif tracking-wider transition-colors duration-300 block ${
                         isActive ? 'text-secondary font-semibold' : 'text-emerald-100/70 hover:text-white'
                       }`}

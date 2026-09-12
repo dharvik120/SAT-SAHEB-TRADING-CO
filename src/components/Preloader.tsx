@@ -14,18 +14,27 @@ export default function Preloader({ enabled = true }: { enabled?: boolean }) {
       return
     }
 
-    // Simulate progress load
+    // Check if user already saw preloader in this session
+    if (typeof window !== 'undefined' && sessionStorage.getItem('sst_preloader_shown') === 'true') {
+      setLoading(false)
+      return
+    }
+
+    // Fast, crisp progress load (completes in ~300ms)
     const interval = setInterval(() => {
       setProgress((prev) => {
         if (prev >= 100) {
           clearInterval(interval)
-          setTimeout(() => setLoading(false), 500)
+          if (typeof window !== 'undefined') {
+            sessionStorage.setItem('sst_preloader_shown', 'true')
+          }
+          setTimeout(() => setLoading(false), 200)
           return 100
         }
-        const step = Math.floor(Math.random() * 15) + 5
+        const step = Math.floor(Math.random() * 25) + 20
         return Math.min(prev + step, 100)
       });
-    }, 100)
+    }, 40)
 
     return () => clearInterval(interval)
   }, [enabled])

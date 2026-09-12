@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
@@ -21,8 +21,16 @@ interface Props {
 
 export default function AdminClientWrapper(props: Props) {
   const router = useRouter()
-  const [checkingAuth, setCheckingAuth] = useState(true)
-  const [currentUser, setCurrentUser] = useState<any>(null)
+  // Immediate instant mount if admin session already exists in localStorage
+  const hasLocalSession = typeof window !== 'undefined' && localStorage.getItem('sst_admin_logged_in') === 'true'
+  const [checkingAuth, setCheckingAuth] = useState(!hasLocalSession)
+  const [currentUser, setCurrentUser] = useState<any>(() => {
+    if (hasLocalSession) {
+      const email = localStorage.getItem('sst_admin_email') || 'Super Admin'
+      return { email, displayName: email }
+    }
+    return null
+  })
 
   useEffect(() => {
     // Check client session in localStorage or Firebase Auth
