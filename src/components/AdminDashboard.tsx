@@ -618,7 +618,7 @@ export default function AdminDashboard({
       import('firebase/firestore').then(({ doc, collection, onSnapshot }) => {
         // 1. Settings
         unsubSettings = onSnapshot(doc(firestore, 'websiteSettings', 'id_1'), (snap) => {
-          if (snap.exists()) {
+          if (snap.exists() && !snap.metadata?.hasPendingWrites) {
             const data = snap.data() as any
             setSettings(prev => ({ ...prev, ...data }))
             if (data.aboutCards) {
@@ -1114,16 +1114,22 @@ export default function AdminDashboard({
     setSaving(true)
     try {
       const isEdit = !!editProduct.id
+      const galleryList = Array.isArray(editProduct.gallery) ? editProduct.gallery : []
+      const productPayload = {
+        ...editProduct,
+        gallery: galleryList,
+        images: galleryList.map((url: string, idx: number) => ({ url, order: idx })),
+      }
       const res = await fetch('/api/admin/products', {
         method: isEdit ? 'PUT' : 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(editProduct),
+        body: JSON.stringify(productPayload),
       })
       if (!res.ok) throw new Error()
       const data = await res.json()
       
       if (isEdit) {
-        setProducts(prev => prev.map(p => p.id === editProduct.id ? { ...p, ...editProduct } as ProductData : p))
+        setProducts(prev => prev.map(p => p.id === editProduct.id ? { ...p, ...productPayload } as ProductData : p))
         showToast('success', 'Product updated successfully')
       } else {
         setProducts(prev => [...prev, data.product])
@@ -4010,7 +4016,19 @@ export default function AdminDashboard({
                           <td className="py-3 text-right">
                             <div className="flex items-center justify-end gap-2">
                               <button
-                                onClick={() => setEditProduct({ ...prod, gallery: (prod as any).images?.map((i: any) => i.url) || [prod.featuredImage] })}
+                                onClick={() => {
+                                  const rawGallery = (prod as any).gallery
+                                  const rawImages = (prod as any).images
+                                  let gList: string[] = []
+                                  if (Array.isArray(rawGallery) && rawGallery.length > 0) {
+                                    gList = rawGallery.map((i: any) => typeof i === 'string' ? i : i.url)
+                                  } else if (Array.isArray(rawImages) && rawImages.length > 0) {
+                                    gList = rawImages.map((i: any) => typeof i === 'string' ? i : i.url)
+                                  } else if (prod.featuredImage) {
+                                    gList = [prod.featuredImage]
+                                  }
+                                  setEditProduct({ ...prod, gallery: gList })
+                                }}
                                 className="p-2 border border-accent hover:border-primary text-text-primary hover:text-primary transition-colors"
                                 title="Edit product"
                               >
@@ -4109,16 +4127,39 @@ export default function AdminDashboard({
                         <div className="relative flex-1 w-full overflow-hidden">
                           <img src={imgUrl} alt={`Gallery ${imgIdx}`} className="h-full w-full object-contain" />
                         </div>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            const updatedGallery = (editProduct.gallery || []).filter((_, idx) => idx !== imgIdx)
-                            setEditProduct({ ...editProduct, gallery: updatedGallery })
-                          }}
-                          className="mt-2 w-full py-1 text-[10px] bg-red-100 text-red-700 hover:bg-red-200 uppercase font-bold tracking-wider"
-                        >
-                          Remove
-                        </button>
+                        <div className="flex gap-1 mt-2">
+                          <label className="flex-1 py-1 text-center text-[10px] bg-primary text-white hover:bg-primary-light uppercase font-bold tracking-wider cursor-pointer">
+                            Change
+                            <input
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              onChange={async (e) => {
+                                const file = e.target.files?.[0]
+                                if (file) {
+                                  showToast('success', 'Uploading replacement image...')
+                                  const url = await handleUploadImage(file, 'products')
+                                  if (url) {
+                                    const updatedGallery = [...(editProduct.gallery || [])]
+                                    updatedGallery[imgIdx] = url
+                                    setEditProduct({ ...editProduct, gallery: updatedGallery })
+                                    showToast('success', 'Image replaced')
+                                  }
+                                }
+                              }}
+                            />
+                          </label>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const updatedGallery = (editProduct.gallery || []).filter((_, idx) => idx !== imgIdx)
+                              setEditProduct({ ...editProduct, gallery: updatedGallery })
+                            }}
+                            className="flex-1 py-1 text-[10px] bg-red-100 text-red-700 hover:bg-red-200 uppercase font-bold tracking-wider"
+                          >
+                            Remove
+                          </button>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -5027,7 +5068,7 @@ export default function AdminDashboard({
                             onClick={async () => {
                               if (!confirm('Delete this gallery image?')) return
                               try {
-                                const res = await fetch('/api/admin/gallery', {
+                                const res = await fetch(`/api/admin/gallery?id=${img.id}`, {
                                   method: 'DELETE',
                                   headers: { 'Content-Type': 'application/json' },
                                   body: JSON.stringify({ id: img.id }),
@@ -5066,11 +5107,12 @@ export default function AdminDashboard({
                       body: JSON.stringify(editGalleryImage),
                     })
                     if (!res.ok) throw new Error()
-                    const saved = await res.json()
+                    const resData = await res.json()
+                    const saved = resData.image || resData
                     if (isNew) {
                       setGallery(prev => [...prev, saved])
                     } else {
-                      setGallery(prev => prev.map(g => g.id === saved.id ? saved : g))
+                      setGallery(prev => prev.map(g => (g.id === saved.id || g.id === editGalleryImage.id) ? { ...g, ...saved } : g))
                     }
                     setEditGalleryImage(null)
                     showToast('success', `Gallery image ${isNew ? 'added' : 'updated'} successfully`)

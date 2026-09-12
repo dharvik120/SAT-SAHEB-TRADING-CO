@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { collection, onSnapshot } from 'firebase/firestore'
+import { collection, doc, onSnapshot } from 'firebase/firestore'
 import { firestore } from '@/lib/firebase'
 import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -25,11 +25,16 @@ interface Props {
   pageDescription?: string
 }
 
-export default function GalleryClient({ images: initialImages, categories: initialCategories, pageLabel, pageTitle, pageDescription }: Props) {
+export default function GalleryClient({ images: initialImages, categories: initialCategories, pageLabel: initialPageLabel, pageTitle: initialPageTitle, pageDescription: initialPageDescription }: Props) {
   const [images, setImages] = useState<GalleryImageData[]>(initialImages)
   const [categories, setCategories] = useState<string[]>(initialCategories)
   const [selectedImg, setSelectedImg] = useState<GalleryImageData | null>(null)
   const [activeCategory, setActiveCategory] = useState<string>('All')
+  const [headerContent, setHeaderContent] = useState({
+    label: initialPageLabel,
+    title: initialPageTitle,
+    description: initialPageDescription,
+  })
 
   useEffect(() => {
     try {
@@ -48,11 +53,26 @@ export default function GalleryClient({ images: initialImages, categories: initi
           }
         }
       })
-      return () => unsub()
+
+      const unsubSettings = onSnapshot(doc(firestore, 'websiteSettings', 'id_1'), (snap) => {
+        if (snap.exists()) {
+          const data = snap.data()
+          setHeaderContent({
+            label: data.galleryPageLabel || initialPageLabel,
+            title: data.galleryPageTitle || initialPageTitle,
+            description: data.galleryPageDescription || initialPageDescription,
+          })
+        }
+      })
+
+      return () => {
+        unsub()
+        unsubSettings()
+      }
     } catch (e) {
       console.warn('GalleryClient live listener bypassed:', e)
     }
-  }, [])
+  }, [initialPageLabel, initialPageTitle, initialPageDescription])
 
   const filtered = activeCategory === 'All'
     ? images
@@ -65,13 +85,13 @@ export default function GalleryClient({ images: initialImages, categories: initi
       <section className="bg-bg-secondary py-20 px-6 border-b border-accent">
         <div className="max-w-4xl mx-auto text-center">
           <span className="text-xs uppercase tracking-mega text-secondary font-bold block mb-4">
-            {pageLabel || 'Visual Registry'}
+            {headerContent.label || 'Visual Registry'}
           </span>
           <h1 className="text-4xl md:text-6xl font-serif text-text-primary tracking-wide leading-tight mb-6">
-            {pageTitle || 'Corporate Gallery'}
+            {headerContent.title || 'Corporate Gallery'}
           </h1>
           <p className="text-sm md:text-base text-text-secondary leading-relaxed max-w-2xl mx-auto">
-            {pageDescription || 'A premium collection of our verified agricultural products and cargo consignments. All images are managed from the admin dashboard.'}
+            {headerContent.description || 'A premium collection of our verified agricultural products and cargo consignments. All images are managed from the admin dashboard.'}
           </p>
         </div>
       </section>

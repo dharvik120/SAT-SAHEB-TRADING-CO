@@ -235,7 +235,9 @@ export async function addProduct(data: any) {
 
 export async function updateProduct(id: string | number, data: any) {
   if (isFirebaseConfigured) {
-    await updateDoc(doc(firestore, 'products', id.toString()), data)
+    const payload = { ...data }
+    delete payload.id
+    await updateDoc(doc(firestore, 'products', id.toString()), payload)
     return { id, ...data }
   }
   const images = data.images || []
@@ -482,7 +484,9 @@ export async function addGalleryImage(data: any) {
 
 export async function updateGalleryImage(id: string | number, data: any) {
   if (isFirebaseConfigured) {
-    await updateDoc(doc(firestore, 'galleryImages', id.toString()), data)
+    const payload = { ...data }
+    delete payload.id
+    await updateDoc(doc(firestore, 'galleryImages', id.toString()), payload)
     return { id, ...data }
   }
   return prismaDb.galleryImage.update({

@@ -59,9 +59,17 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
   const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${waMessage}`
 
   // Gather gallery image URLs
-  const galleryImages = (product.images || []).length > 0
-    ? product.images.map((img: any) => img.url)
-    : [product.featuredImage]
+  const rawGallery = (product as any).gallery
+  const rawImages = product.images
+  let galleryImages: string[] = []
+  if (Array.isArray(rawGallery) && rawGallery.length > 0) {
+    galleryImages = rawGallery.map((img: any) => typeof img === 'string' ? img : img.url).filter(Boolean)
+  } else if (Array.isArray(rawImages) && rawImages.length > 0) {
+    galleryImages = rawImages.map((img: any) => typeof img === 'string' ? img : img.url).filter(Boolean)
+  }
+  if (galleryImages.length === 0 && product.featuredImage) {
+    galleryImages = [product.featuredImage]
+  }
 
   return (
     <div className="flex flex-col w-full bg-bg-primary overflow-hidden pt-24 font-sans">
@@ -84,7 +92,7 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
         
         {/* Left Column: Premium Lightbox Gallery */}
         <div className="lg:col-span-6 w-full">
-          <ProductGallery images={galleryImages} />
+          <ProductGallery images={galleryImages} productId={product.id} />
         </div>
 
         {/* Right Column: Text & Specs Info */}

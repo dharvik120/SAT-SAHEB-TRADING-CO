@@ -1,4 +1,4 @@
-﻿// Direct client-side Firestore router for AdminDashboard
+// Direct client-side Firestore router for AdminDashboard
 import { 
   collection, 
   doc, 
@@ -301,10 +301,10 @@ export async function adminClientFetch(inputUrl: string, init?: RequestInit): Pr
           return mockResponse({ success: true })
         }
         const updated = await updateGalleryImage(body.id, body)
-        return mockResponse({ success: true, image: updated })
+        return mockResponse({ success: true, image: updated, ...updated })
       }
       if (method === 'DELETE') {
-        const id = searchParams.get('id')
+        const id = searchParams.get('id') || body?.id
         if (id) await deleteGalleryImage(id)
         return mockResponse({ success: true })
       }

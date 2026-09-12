@@ -1,17 +1,49 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Maximize2, X, ChevronLeft, ChevronRight } from 'lucide-react'
 
 interface ProductGalleryProps {
   images: string[]
+  productId?: string | number
 }
 
-export default function ProductGallery({ images }: ProductGalleryProps) {
+export default function ProductGallery({ images: initialImages, productId }: ProductGalleryProps) {
+  const [images, setImages] = useState<string[]>(initialImages)
   const [activeIdx, setActiveIdx] = useState(0)
   const [lightboxOpen, setLightboxOpen] = useState(false)
+
+  // Real-time listener for product gallery updates
+  useEffect(() => {
+    if (!productId) return
+    try {
+      import('firebase/firestore').then(({ doc, onSnapshot }) => {
+        import('@/lib/firebase').then(({ firestore }) => {
+          onSnapshot(doc(firestore, 'products', productId.toString()), (snap) => {
+            if (snap.exists()) {
+              const data = snap.data()
+              const rawGal = (data as any).gallery
+              const rawImgs = (data as any).images
+              let freshImgs: string[] = []
+              if (Array.isArray(rawGal) && rawGal.length > 0) {
+                freshImgs = rawGal.map((i: any) => typeof i === 'string' ? i : i.url).filter(Boolean)
+              } else if (Array.isArray(rawImgs) && rawImgs.length > 0) {
+                freshImgs = rawImgs.map((i: any) => typeof i === 'string' ? i : i.url).filter(Boolean)
+              }
+              if (freshImgs.length === 0 && data.featuredImage) {
+                freshImgs = [data.featuredImage]
+              }
+              if (freshImgs.length > 0) {
+                setImages(freshImgs)
+              }
+            }
+          })
+        })
+      })
+    } catch (e) {}
+  }, [productId])
 
   if (!images || images.length === 0) return null
 
